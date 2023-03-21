@@ -1,55 +1,92 @@
 import java.util.Random;
 
-static final int POINT_N = 15000000;
-static final int R=350;
-int p_y = 0;
-double pi;
+static final int TOTAL_NUMBER_OF_POINTS = 100000;
+static final int SQUARE_LEANGTH_IN_PIXELS=400;
+float border;
+int numberOfPointsInTheCircle = 0;
+double piApproximation;
+float pointRadius = 1;
+Random randomValues = new Random();
+float centrePoint[] = new float[2];
 
 void setup(){
-  size(800, 800);
-  stroke(255);
+  size(500, 500);
+  stroke(0);
+  textSize(30);
+  fill(200,200,200);
   noLoop();
+  border = (width-SQUARE_LEANGTH_IN_PIXELS)/2;
+  centrePoint[0] = centrePoint[1] = width/2;
+  drawBasicUI();
+  noStroke();
 }
 
 void draw(){
-  fill(200,200,200);
-  stroke(0);
-  square(50, 50, R*2);
-  ellipse(height/2, width/2,R*2,R*2);
-  
-  Random random = new Random();
-  
-  for(int i=0; i<POINT_N; i++)
-  {
-    double x = random.nextDouble();
-    double y = random.nextDouble();
-    while(x>0.5){
-      x = random.nextDouble();
-    }
-    x*=R*4;
-    while(y>0.5){
-      y = random.nextDouble();
-    }
-    y*=R*4;
-    
-    fill(255,0,0);
-    if(inside_circle(x+50,y+50)){
-      p_y++;
-      fill(0,0,255);
-    }
-    ellipse((float)(x+50),(float)(y+50),1,1);
-  }
-  
-
-  double r_squared = Math.pow(R, 2); // square area
-  double circle_area = r_squared*((double)((100.0*p_y)/POINT_N))/100.0;
-  pi=4.0*(circle_area/r_squared);
-  String s = String.format("The approssimation of pi is: %.8g%n", pi);
-  textSize(20);
-  fill(0);
-  text(s, 5,25);
+  approximatePi();
 }
 
-boolean inside_circle(double x, double y){
-  return dist((float)x,(float)y,width/2.0,height/2.0)<=(double)R;
+void approximatePi()
+{ 
+  generateAndDrawRandomPoints();
+  calculatePi();
+  outputPiValue(); 
+}
+
+
+void drawBasicUI()
+{
+  square(border, border, SQUARE_LEANGTH_IN_PIXELS);
+  ellipse(height/2, width/2,SQUARE_LEANGTH_IN_PIXELS,SQUARE_LEANGTH_IN_PIXELS);
+}
+
+void generateAndDrawRandomPoints()
+{
+  for(int i=0; i<TOTAL_NUMBER_OF_POINTS; i++)
+  {
+    double x = random(border, width-border);
+    double y = random(border, height-border);
+    checkAndDrawThePoint(x,y);
+  }
+}
+
+void checkAndDrawThePoint(double x, double y)
+{
+  checkThePoint(x,y);
+  drawThePoint(x,y);
+}
+
+void checkThePoint(double x, double y){
+  fill(255,0,0);
+  if(isThePointInTheCircle(x,y)){
+      numberOfPointsInTheCircle++;
+      fill(0,0,255);
+  }
+}
+
+
+boolean isThePointInTheCircle(double x, double y){
+  return dist((float)x,(float)y,centrePoint[0],centrePoint[1]) <= (double)SQUARE_LEANGTH_IN_PIXELS/2;
+}
+
+void drawThePoint(double x, double y)
+{
+  ellipse((float)(x),(float)(y),pointRadius,pointRadius);
+}
+
+
+void calculatePi()
+{
+  double squareArea = Math.pow(SQUARE_LEANGTH_IN_PIXELS, 2);
+  double circle_area = squareArea*((double)(numberOfPointsInTheCircle)/TOTAL_NUMBER_OF_POINTS);
+  piApproximation=4.0*(circle_area/squareArea);
+}
+
+
+void outputPiValue()
+{
+  String s = String.format("Pi ≈ %g", piApproximation);
+  print(s);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text(s, centrePoint[0],centrePoint[1]);
 }
